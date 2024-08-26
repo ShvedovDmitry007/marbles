@@ -1,50 +1,49 @@
 'use strict';
 
 (() => {
-  // console.log(`Старт игры!`);
-
   // Количество шариков на старте игры
   const balls = {
     player: 5,
     bot: 5,
   };
+
   alert(`Старт игры!\nКоличество шариков\nИгрок: ${balls.player}\nБот: ${balls.bot}`);
 
-
-  const getRandomIntInclusive = (min, max) => {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
-  };
-
   const game = () => {
-    // Загадываем число шариков:
-    // Игрок
+    // Игрок загадывает число
     const playerEntered = () => {
       const playerPrompt = +prompt(`Загадайте число от 1 до ${balls.player}`);
+
+      if (!Number.isInteger(playerPrompt)) {
+        alert ('Введите целое число!');
+        return playerEntered();
+      }
+
       if (playerPrompt === 0) {
-        const endGame = confirm('Желаете закончить игру?');
+        const endGame = confirm('Хотите закончить игру?');
 
         if (endGame === true) {
           alert('До встречи! :-)');
+          return;
         } else {
-          alert('Введите что-то...');
+          alert('Попробуем заново. Введите число:');
           return playerEntered();
         }
-      } else if (isNaN(playerPrompt)) {
+      }
+
+      if (isNaN(playerPrompt)) {
         alert('Вы ввели не число!');
         return playerEntered();
-      } else if (parseFloat(playerPrompt) >= 1 &&
-                parseFloat(playerPrompt) <= balls.player) {
+      }
+
+      if (parseFloat(playerPrompt) >= 1 && parseFloat(playerPrompt) <= balls.player) {
         return playerPrompt;
-      } else if (playerPrompt === null) {
-        alert('Game Over!');
-        return;
       } else {
         alert(`Число должно быть от 1 до ${balls.player}`);
         return playerEntered();
       }
     };
+
     const playerChoice = playerEntered();
 
     if (playerChoice === undefined) {
@@ -52,45 +51,46 @@
       return;
     }
 
-    // Бот
-    const botChoice = getRandomIntInclusive(1, balls.bot);
+    alert(`Вы загадали ${playerChoice} шариков`);
 
-    alert(`Игрок загадал ${playerChoice} шариков\nБот загадал ${botChoice} шариков`);
+    // Бот угадывает, чётное или нечётное число ввел игрок
+    const botChoice = Math.floor(Math.random() * 2) === 0 ? 'even' : 'odd';
+
+    alert(`Бот считает что число ${botChoice === 'even' ? 'чётное' : 'нечётное'}`);
 
     // Проверяем, угадал ли бот
-    const evenOrOdd = number => (number % 2 === 0 ? 'even' : 'odd');
-
-    if (evenOrOdd(botChoice) === 'even' &&
-        evenOrOdd(playerChoice) === 'even') {
-      alert('Бот угадал чётное количество шариков!');
-    } else if (evenOrOdd(botChoice) === 'odd' &&
-              evenOrOdd(playerChoice) === 'odd') {
-      alert('Бот угадал нечётное количество шариков!');
+    if (playerChoice % 2 === 0 && botChoice === 'even' ||
+        playerChoice % 2 !== 0 && botChoice === 'odd') {
+      alert('Бот угадал!');
     } else {
       alert('Бот не угадал!');
     }
 
     // Считаем результат
-    if (evenOrOdd(botChoice) === 'even' &&
-        evenOrOdd(playerChoice) === 'even' ||
-        evenOrOdd(botChoice) === 'odd' &&
-        evenOrOdd(playerChoice) === 'odd') {
-      alert('Бот выиграл раунд!');
+    if (playerChoice % 2 === 0 && botChoice === 'even' ||
+        playerChoice % 2 !== 0 && botChoice === 'odd') {
+      alert('Бот выиграл раунд и забрал шарики себе.');
       balls.bot += playerChoice;
       balls.player -= playerChoice;
     } else {
-      alert('Игрок выиграл раунд!');
-      balls.player += botChoice;
-      balls.bot -= botChoice;
+      alert('Вы выигрываете раунд и забираете шарики себе.');
+      balls.player += playerChoice;
+      balls.bot -= playerChoice;
+    }
+
+    if (balls.player < 0) {
+      balls.player = 0;
+    } else if (balls.bot < 0) {
+      balls.bot = 0;
     }
 
     // Выводим информацию о количестве шариков
-    alert(`У игрока ${balls.player} шариков\nУ бота ${balls.bot} шариков`);
+    alert(`У Вас ${balls.player} шариков\nУ бота ${balls.bot} шариков`);
 
-    if (balls.player === 0 || balls.player < 0) {
-      alert(`Игра закончена! Бот побеждает.`);
-    } else if (balls.bot === 0 || balls.bot < 0) {
-      alert(`Игра закончена! Игрок побеждает.`);
+    if (balls.player <= 0) {
+      alert(`У Вас закончились шарики. Бот побеждает!`);
+    } else if (balls.bot <= 0) {
+      alert(`У бота закончились шарики. Вы победили!`);
     } else {
       game();
     }
